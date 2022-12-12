@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/features/activity/presentation/activity_detail_page.dart';
 
 class ActivityTile extends StatefulWidget {
   const ActivityTile({Key? key}) : super(key: key);
@@ -47,7 +48,9 @@ class _ActivityTileState extends State<ActivityTile> {
 
   void _onPressedTile() {
     // TODO:
-    Navigator.of(context).pushNamed('/activity_detail');
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ActivityDetailPage()),
+    );
   }
 
   void _onPressedIcon() {

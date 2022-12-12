@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web/features/activity/presentation/add_activity_page.dart';
 import 'package:flutter_web/features/activity/presentation/change_activity_page.dart';
 import 'package:flutter_web/features/login/presentation/login_page.dart';
+import 'package:flutter_web/features/register/presentation/register_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,14 +21,15 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.purple,
       ),
-      initialRoute: '/activity_list', //'/login',
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/activity_list': (context) => const ActivityListPage(),
-        '/activity_detail': (context) => const ActivityDetailPage(),
-        '/add_activity': (context) => const AddActivityPage(),
-        '/change_activity': (context) => const ChangeActivityPage(),
-      },
+      home: const LoginPage(),
+      // routes: {
+      //   '/login': (context) => const LoginPage(),
+      //   '/register': (context) => const RegisterPage(),
+      //   '/activity_list': (context) => const ActivityListPage(),
+      //   '/activity_detail': (context) => const ActivityDetailPage(),
+      //   '/add_activity': (context) => const AddActivityPage(),
+      //   '/change_activity': (context) => const ChangeActivityPage(),
+      // },
     );
   }
 }

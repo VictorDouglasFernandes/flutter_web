@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/features/activity/presentation/change_activity_page.dart';
 
 class ActivityDetailPage extends StatefulWidget {
   const ActivityDetailPage({Key? key}) : super(key: key);
@@ -94,7 +95,9 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
   }
 
   void _onTapChange() {
-    Navigator.of(context).pushNamed('/change_activity');
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ChangeActivityPage()),
+    );
   }
 
   void _onTapDelete() {

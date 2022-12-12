@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_web/features/activity/presentation/activity_list_page.dart';
+import 'package:flutter_web/features/login/presentation/login_page.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
 
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _passwordConfirmationController =
+      TextEditingController();
 
   late Size _size;
 
@@ -61,10 +63,27 @@ class _LoginPageState extends State<LoginPage> {
                     value?.isEmpty ?? true ? 'Obrigatório' : null,
               ),
               const SizedBox(height: 32.0),
+              TextFormField(
+                obscureText: true,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Confirme a Senha',
+                ),
+                controller: _passwordConfirmationController,
+                validator: (value) {
+                  if ((value?.isEmpty ?? true) ||
+                      value != _passwordController.text) {
+                    return 'Senha diferente';
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              const SizedBox(height: 32.0),
               OutlinedButton(
-                onPressed: _onTapLogin,
+                onPressed: _onTapRegister,
                 child: const Text(
-                  'Logar',
+                  'Cadastrar',
                 ),
               ),
             ],
@@ -74,12 +93,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _onTapLogin() async {
+  void _onTapRegister() {
     if (_formKey.currentState!.validate()) {
       try {
         //
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const ActivityListPage()),
+          MaterialPageRoute(builder: (_) => const LoginPage()),
         );
       } catch (e) {
         //

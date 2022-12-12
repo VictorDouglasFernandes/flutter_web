@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web/features/activity/presentation/activity_tile.dart';
+import 'package:flutter_web/features/activity/presentation/add_activity_page.dart';
 
 class ActivityListPage extends StatefulWidget {
   const ActivityListPage({Key? key}) : super(key: key);
@@ -66,6 +67,8 @@ class _ActivityListPageState extends State<ActivityListPage> {
   }
 
   void _onPressedCreate() {
-    Navigator.of(context).pushNamed('/add_activity');
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const AddActivityPage()),
+    );
   }
 }
