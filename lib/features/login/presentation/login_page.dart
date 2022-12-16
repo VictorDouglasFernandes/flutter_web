@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/commons/widgets/error_dialog.dart';
 import 'package:flutter_web/features/activity/presentation/activity_list_page.dart';
+import 'package:flutter_web/features/login/business/controllers/login_controller.dart';
+import 'package:flutter_web/features/login/business/entities/user.dart';
+import 'package:flutter_web/features/register/presentation/register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -15,7 +19,7 @@ class _LoginPageState extends State<LoginPage> {
 
   late Size _size;
 
-  double get _padding => _size.shortestSide * 0.4;
+  double get _padding => _size.shortestSide * 0.2;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -34,6 +38,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Login'),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: EdgeInsets.fromLTRB(_padding, _padding, _padding, 0.0),
         child: Form(
@@ -67,6 +75,11 @@ class _LoginPageState extends State<LoginPage> {
                   'Logar',
                 ),
               ),
+              const SizedBox(height: 32.0),
+              TextButton(
+                onPressed: _sendRegisterPage,
+                child: const Text('Se Cadastrar'),
+              ),
             ],
           ),
         ),
@@ -76,14 +89,26 @@ class _LoginPageState extends State<LoginPage> {
 
   void _onTapLogin() async {
     if (_formKey.currentState!.validate()) {
-      try {
-        //
+      LoginController()
+          .login(
+        User(
+          login: _emailController.text,
+          password: _passwordController.text,
+        ),
+      )
+          .then((_) {
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const ActivityListPage()),
         );
-      } catch (e) {
-        //
-      }
+      }).catchError((error) {
+        ErrorDialog.show(context, error);
+      });
     }
+  }
+
+  void _sendRegisterPage() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => RegisterPage()),
+    );
   }
 }

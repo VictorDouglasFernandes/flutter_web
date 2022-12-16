@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/commons/widgets/error_dialog.dart';
+import 'package:flutter_web/features/activity/business/controllers/activity_controller.dart';
 import 'package:flutter_web/features/activity/presentation/activity_tile.dart';
 import 'package:flutter_web/features/activity/presentation/add_activity_page.dart';
+import 'package:flutter_web/features/user/presentation/change_password_page.dart';
 
 class ActivityListPage extends StatefulWidget {
   const ActivityListPage({Key? key}) : super(key: key);
@@ -10,9 +13,24 @@ class ActivityListPage extends StatefulWidget {
 }
 
 class _ActivityListPageState extends State<ActivityListPage> {
+  ActivityController controller = ActivityController();
+
+  bool _isLoading = false;
+
   late Size _size;
 
-  double get _padding => _size.shortestSide * 0.4;
+  double get _padding => _size.shortestSide * 0.2;
+
+  @override
+  void initState() {
+    super.initState();
+    _isLoading = true;
+    controller.list().catchError((error) {
+      ErrorDialog.show(context, error);
+    }).whenComplete(() {
+      this.setState(() => this._isLoading = false);
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -26,49 +44,68 @@ class _ActivityListPageState extends State<ActivityListPage> {
       appBar: AppBar(
         title: const Text('Listagem'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.password),
+            onPressed: _onTapChangePassword,
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(_padding, 32.0, _padding, 0.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextButton(
-              onPressed: _onPressedCreate,
-              style: TextButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Theme.of(context).primaryColor),
-                  borderRadius: BorderRadius.circular(16.0),
+      body: Visibility(
+        visible: !_isLoading,
+        replacement: const LinearProgressIndicator(),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(_padding, 32.0, _padding, 0.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton(
+                onPressed: _onPressedCreate,
+                style: TextButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Theme.of(context).primaryColor),
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                  ],
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(
-                    Icons.add,
-                    color: Colors.white,
-                  ),
-                ],
+              const SizedBox(height: 12.0),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: controller.state.activities.length,
+                itemBuilder: (context, index) => ActivityTile(
+                  controller.state.activities[index],
+                  controller,
+                ),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12.0),
               ),
-            ),
-            const SizedBox(height: 12.0),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 20,
-              itemBuilder: (context, index) => const ActivityTile(),
-              separatorBuilder: (context, index) =>
-                  const SizedBox(height: 12.0),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
+  void _onTapChangePassword() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ChangePasswordPage()),
+    );
+  }
+
   void _onPressedCreate() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const AddActivityPage()),
+      MaterialPageRoute(builder: (_) => AddActivityPage(controller)),
     );
   }
 }

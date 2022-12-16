@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/features/activity/business/controllers/activity_controller.dart';
+import 'package:flutter_web/features/activity/business/entities/activity.dart';
+import 'package:flutter_web/features/login/business/controllers/login_controller.dart';
 
 class AddActivityPage extends StatefulWidget {
-  const AddActivityPage({Key? key}) : super(key: key);
+  final ActivityController controller;
+  const AddActivityPage(this.controller, {Key? key}) : super(key: key);
 
   @override
   State<AddActivityPage> createState() => _AddActivityPageState();
@@ -14,7 +18,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
 
   late Size _size;
 
-  double get _padding => _size.shortestSide * 0.4;
+  double get _padding => _size.shortestSide * 0.2;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -34,6 +38,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
       body: Padding(
         padding: EdgeInsets.fromLTRB(_padding, _padding, _padding, 0.0),
         child: Form(
+          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -83,13 +88,15 @@ class _AddActivityPageState extends State<AddActivityPage> {
     );
   }
 
-  void _onTapSave() {
+  void _onTapSave() async {
     if (_formKey.currentState!.validate()) {
-      try {
-        //
-      } catch (e) {
-        //
-      }
+      await widget.controller.post(
+        Activity(
+          title: _titleController.text,
+          description: _descriptionController.text,
+          user: LoginController().state.user?.login,
+        ),
+      );
     }
   }
 }

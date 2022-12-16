@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/commons/widgets/error_dialog.dart';
+import 'package:flutter_web/features/activity/business/controllers/activity_controller.dart';
+import 'package:flutter_web/features/activity/business/entities/activity.dart';
 import 'package:flutter_web/features/activity/presentation/change_activity_page.dart';
 
 class ActivityDetailPage extends StatefulWidget {
-  const ActivityDetailPage({Key? key}) : super(key: key);
+  final Activity activity;
+  final ActivityController controller;
+  const ActivityDetailPage(this.activity, this.controller, {Key? key})
+      : super(key: key);
 
   @override
   State<ActivityDetailPage> createState() => _ActivityDetailPageState();
 }
 
 class _ActivityDetailPageState extends State<ActivityDetailPage> {
+  Activity get activity => widget.activity;
+
   late Color textColor;
 
   late Size _size;
 
-  double get _padding => _size.shortestSide * 0.4;
+  double get _padding => _size.shortestSide * 0.2;
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  TextEditingController _shareController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -29,6 +41,12 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
       appBar: AppBar(
         title: const Text('Detalhes'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: _onTapShare,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(_padding, _padding, _padding, 0.0),
@@ -36,18 +54,23 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'ID',
+              activity.title ?? '- - -',
               style: TextStyle(color: textColor),
             ),
             const SizedBox(height: 32.0),
             Text(
-              'Title',
+              activity.description ?? '- - -',
               style: TextStyle(color: textColor),
             ),
-            const SizedBox(height: 32.0),
-            Text(
-              'Description',
-              style: TextStyle(color: textColor),
+            Visibility(
+              visible: activity.share != null,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 32.0),
+                child: Text(
+                  'Compartilhado por: ${activity.share}',
+                  style: TextStyle(color: textColor),
+                ),
+              ),
             ),
             const SizedBox(height: 32.0),
             TextButton(
@@ -94,9 +117,54 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
     );
   }
 
+  void _onTapShare() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Compartilhar'),
+        content: Form(
+          key: _formKey,
+          child: TextFormField(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Email',
+            ),
+            controller: _shareController,
+            validator: (value) => value?.isEmpty ?? true ? 'Obrigatório' : null,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                widget.controller.post(
+                  Activity(
+                    title: activity.title,
+                    description: activity.description,
+                    user: _shareController.text,
+                    share: activity.user,
+                  ),
+                );
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Compartilhar'),
+          )
+        ],
+      ),
+    );
+  }
+
   void _onTapChange() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const ChangeActivityPage()),
+      MaterialPageRoute(
+          builder: (_) => ChangeActivityPage(activity, widget.controller)),
     );
   }
 
@@ -115,8 +183,13 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(true);
+            onPressed: () async {
+              await widget.controller.delete(widget.activity).then((_) {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              }).catchError((error) {
+                ErrorDialog.show(context, error);
+              });
             },
             child: const Text('Excluir'),
           ),
