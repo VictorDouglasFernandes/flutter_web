@@ -15,8 +15,6 @@ class ActivityListPage extends StatefulWidget {
 class _ActivityListPageState extends State<ActivityListPage> {
   ActivityController controller = ActivityController();
 
-  bool _isLoading = false;
-
   late Size _size;
 
   double get _padding => _size.shortestSide * 0.2;
@@ -24,11 +22,11 @@ class _ActivityListPageState extends State<ActivityListPage> {
   @override
   void initState() {
     super.initState();
-    _isLoading = true;
     controller.list().catchError((error) {
       ErrorDialog.show(context, error);
-    }).whenComplete(() {
-      this.setState(() => this._isLoading = false);
+    });
+    controller.state.activities.addListener(() {
+      setState(() {});
     });
   }
 
@@ -52,7 +50,7 @@ class _ActivityListPageState extends State<ActivityListPage> {
         ],
       ),
       body: Visibility(
-        visible: !_isLoading,
+        visible: !controller.state.isLoading.value,
         replacement: const LinearProgressIndicator(),
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(_padding, 32.0, _padding, 0.0),
@@ -82,9 +80,9 @@ class _ActivityListPageState extends State<ActivityListPage> {
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: controller.state.activities.length,
+                itemCount: controller.state.activities.value.length,
                 itemBuilder: (context, index) => ActivityTile(
-                  controller.state.activities[index],
+                  controller.state.activities.value[index],
                   controller,
                 ),
                 separatorBuilder: (context, index) =>
@@ -104,8 +102,14 @@ class _ActivityListPageState extends State<ActivityListPage> {
   }
 
   void _onPressedCreate() {
-    Navigator.of(context).push(
+    Navigator.of(context)
+        .push(
       MaterialPageRoute(builder: (_) => AddActivityPage(controller)),
-    );
+    )
+        .then((_) async {
+      await controller.list().catchError((error) {
+        ErrorDialog.show(context, error);
+      });
+    });
   }
 }

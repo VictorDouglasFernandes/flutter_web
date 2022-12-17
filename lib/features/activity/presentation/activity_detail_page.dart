@@ -162,14 +162,25 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
   }
 
   void _onTapChange() {
-    Navigator.of(context).push(
+    Navigator.of(context)
+        .push(
       MaterialPageRoute(
-          builder: (_) => ChangeActivityPage(activity, widget.controller)),
-    );
+        builder: (_) => ChangeActivityPage(activity, widget.controller),
+      ),
+    )
+        .then((newActivity) {
+      if (newActivity != null) {
+        setState(() {
+          activity
+            ..title = newActivity.title
+            ..description = newActivity.description
+            ..share = newActivity.share;
+        });
+      }
+    });
   }
 
   void _onTapDelete() {
-    // TODO:
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

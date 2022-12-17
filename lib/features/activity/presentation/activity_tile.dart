@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/commons/widgets/error_dialog.dart';
 import 'package:flutter_web/features/activity/business/controllers/activity_controller.dart';
 import 'package:flutter_web/features/activity/business/entities/activity.dart';
 import 'package:flutter_web/features/activity/presentation/activity_detail_page.dart';
@@ -52,15 +53,15 @@ class _ActivityTileState extends State<ActivityTile> {
   }
 
   void _onPressedTile() {
-    // TODO:
     Navigator.of(context)
         .push(
       MaterialPageRoute(
-          builder: (_) => ActivityDetailPage(activity, widget.controller)),
+        builder: (_) => ActivityDetailPage(activity, widget.controller),
+      ),
     )
         .then((_) {
-      widget.controller.list().whenComplete(() {
-        setState(() {});
+      widget.controller.list().catchError((error) {
+        ErrorDialog.show(context, error);
       });
     });
   }

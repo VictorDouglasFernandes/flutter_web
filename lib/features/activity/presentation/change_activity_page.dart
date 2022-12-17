@@ -31,6 +31,9 @@ class _ChangeActivityPageState extends State<ChangeActivityPage> {
     super.initState();
     _titleController = TextEditingController(text: activity.title);
     _descriptionController = TextEditingController(text: activity.description);
+    widget.controller.state.isLoading.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -46,53 +49,57 @@ class _ChangeActivityPageState extends State<ChangeActivityPage> {
         title: const Text('Alterar'),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(_padding, _padding, _padding, 0.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Título',
+      body: Visibility(
+        visible: !widget.controller.state.isLoading.value,
+        replacement: const LinearProgressIndicator(),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(_padding, _padding, _padding, 0.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Título',
+                  ),
+                  controller: _titleController,
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? 'Obrigatório' : null,
                 ),
-                controller: _titleController,
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Obrigatório' : null,
-              ),
-              const SizedBox(height: 32.0),
-              TextFormField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Descrição',
+                const SizedBox(height: 32.0),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Descrição',
+                  ),
+                  controller: _descriptionController,
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? 'Obrigatório' : null,
                 ),
-                controller: _descriptionController,
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Obrigatório' : null,
-              ),
-              const SizedBox(height: 32.0),
-              TextButton(
-                onPressed: _onTapSave,
-                style: TextButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Theme.of(context).primaryColor),
-                    borderRadius: BorderRadius.circular(16.0),
+                const SizedBox(height: 32.0),
+                TextButton(
+                  onPressed: _onTapSave,
+                  style: TextButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Theme.of(context).primaryColor),
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        'Salvar',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      'Salvar',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -111,7 +118,9 @@ class _ChangeActivityPageState extends State<ChangeActivityPage> {
           share: activity.share,
         ),
       )
-          .catchError((error) {
+          .then((newActivity) {
+        Navigator.of(context).pop(newActivity);
+      }).catchError((error) {
         ErrorDialog.show(context, error);
       });
     }

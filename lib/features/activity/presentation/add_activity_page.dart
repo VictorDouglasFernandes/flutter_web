@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web/commons/widgets/error_dialog.dart';
 import 'package:flutter_web/features/activity/business/controllers/activity_controller.dart';
 import 'package:flutter_web/features/activity/business/entities/activity.dart';
 import 'package:flutter_web/features/login/business/controllers/login_controller.dart';
@@ -90,13 +91,19 @@ class _AddActivityPageState extends State<AddActivityPage> {
 
   void _onTapSave() async {
     if (_formKey.currentState!.validate()) {
-      await widget.controller.post(
+      await widget.controller
+          .post(
         Activity(
           title: _titleController.text,
           description: _descriptionController.text,
           user: LoginController().state.user?.login,
         ),
-      );
+      )
+          .then((_) {
+        Navigator.pop(context);
+      }).catchError((error) {
+        ErrorDialog.show(context, error);
+      });
     }
   }
 }
